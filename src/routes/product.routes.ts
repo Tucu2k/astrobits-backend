@@ -14,6 +14,7 @@ import {
 } from "../controllers/product.controller";
 
 import { validate } from "../middlewares/validate";
+
 import {
   createProductSchema,
   updateProductSchema,
@@ -24,10 +25,12 @@ import {
 
 import { validateProductId } from "../middlewares/validateProductId";
 import { authenticate } from "../middlewares/authenticate";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router = Router();
 
-// Catálogo público
+
+
 router.get("/products", getProducts);
 
 router.get(
@@ -36,34 +39,43 @@ router.get(
   getProductById
 );
 
-// Administración de productos
+
+
+router.post(
+  "/products",
+  authenticate,
+  requireAdmin,
+  validate(createProductSchema),
+  createProduct
+);
+
 router.put(
   "/products/:id",
+  authenticate,
+  requireAdmin,
   validateProductId,
   validate(updateProductSchema),
   updateProduct
 );
 
-router.delete(
-  "/products/:id",
-  validateProductId,
-  deleteProduct
-);
-
 router.patch(
   "/products/:id",
+  authenticate,
+  requireAdmin,
   validateProductId,
   validate(patchProductSchema),
   patchProduct
 );
 
-router.post(
-  "/products",
-  validate(createProductSchema),
-  createProduct
+router.delete(
+  "/products/:id",
+  authenticate,
+  requireAdmin,
+  validateProductId,
+  deleteProduct
 );
 
-// Compras: requieren autenticación
+
 router.post(
   "/products/purchase",
   authenticate,
@@ -78,7 +90,7 @@ router.post(
   purchaseMultipleProducts
 );
 
-// Historial: requiere autenticación
+
 router.get(
   "/purchases",
   authenticate,
